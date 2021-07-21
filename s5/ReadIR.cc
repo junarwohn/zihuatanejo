@@ -132,31 +132,29 @@ void TraverseModule(void) {
                     if ( Inst->getNextNode()->getOpcode() == llvm::Instruction::Add ) {
 
                         llvm::Instruction* nextInst = Inst->getNextNode();
-                       // raw_cout << "Operand 0 : " << Inst->getOperand(0) << " Operand 1 : " << Inst->getOperand(1) <<  " dest : " << Inst<<  "\n";
-                       // raw_cout << "Operand 0 : " << nextInst->getOperand(0) << " Operand 1 : " << nextInst->getOperand(1)  << " dest : " << nextInst <<  "\n";
-                        //raw_cout << *Inst << "\n";
-                        //raw_cout << *nextInst << "\n";
+                        raw_cout << "Operand 0 : " << Inst->getOperand(0) << " Operand 1 : " << Inst->getOperand(1) <<  " dest : " << Inst<<  "\n";
+                        raw_cout << "Operand 0 : " << nextInst->getOperand(0) << " Operand 1 : " << nextInst->getOperand(1)  << " dest : " << nextInst <<  "\n";
+                        raw_cout << *Inst << "\n";
+                        raw_cout << *nextInst << "\n";
                         if ( Inst == nextInst->getOperand(0) ) {
 
-
-                            llvm::Instruction* MulInst = llvm::BinaryOperator::Create(
+                            llvm::Instruction* SubInst = llvm::BinaryOperator::Create(
+                                    llvm::Instruction::Sub,
+                                    nextInst->getOperand(0),
+                                    nextInst->getOperand(1),
+                                    "subtmp",
+                                    Inst
+                                    );
+                            llvm::Instruction* MulSubInst = llvm::BinaryOperator::Create(
                                     llvm::Instruction::Mul,
                                     Inst->getOperand(0),
                                     Inst->getOperand(1),
                                     "multmp",
-                                    nextInst 
-                                    );
-
-                            llvm::Instruction* SubInst = llvm::BinaryOperator::Create(
-                                    llvm::Instruction::Sub,
-                                    MulInst,
-                                    nextInst->getOperand(1),
-                                    "subtmp",
                                     nextInst
                                     );
 
                             nextInst->replaceAllUsesWith( SubInst );
-                            // Inst->replaceAllUsesWith( MulSubInst );
+                            Inst->replaceAllUsesWith( MulSubInst );
                             ToDeleteInsts.push_back( Inst );
                             ToDeleteInsts.push_back( nextInst );
                         }
