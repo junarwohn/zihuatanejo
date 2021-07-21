@@ -97,7 +97,7 @@ int main(int argc, char** argv) {
         for (auto m : func_cnt) {
         std::cout << m.first << " " << m.second << "\n";
         }
-    */
+        */
     return 0;
 
 }
@@ -114,22 +114,21 @@ void TraverseModule(void) {
         for( llvm::Function::iterator FuncIter = Func->begin(); FuncIter != Func->end(); ++FuncIter ) {
             llvm::BasicBlock* BB = llvm::cast<llvm::BasicBlock>(FuncIter);
 
-            std::vector< llvm::Instruction* > LoadInsts;
+            std::vector< llvm::StoreInst* > StoreInsts;
+            llvm::Instruction* LastInst;
+
             for( llvm::BasicBlock::iterator BBIter = BB->begin(); BBIter != BB->end(); ++BBIter ) {
                 llvm::Instruction* Inst = llvm::cast<llvm::Instruction>(BBIter);
 
-                op_code = Inst->getOpcode();
-                if ( op_code == llvm::Instruction::Store && Inst->getNextNode()->getOpcode() == llvm::Instruction::Load) {
-                    llvm::Instruction* nextInst = Inst->getNextNode();
-                    if (nextInst->getOperand(0) == Inst->getOperand(1)) {
-                        nextInst->replaceAllUsesWith(Inst->getOperand(0));
-                        LoadInsts.push_back(nextInst);
-                    }
 
+                if ( llvm::isa< llvm::StoreInst >( Inst )) {
+                    StoreInsts.push_back( llvm::cast< llvm::StoreInst >( Inst ));
                 }
 
+                LastInst = Inst;
+
             }
-            for( int i = 0, Size=LoadInsts.size(); i < Size; ++i) { LoadInsts[i]->eraseFromParent();}
+            for( int i = 0, Size=StoreInsts.size(); i < Size; ++i) { StoreInsts[i]->moveBefore(LastInst);}
         }
     }
 }

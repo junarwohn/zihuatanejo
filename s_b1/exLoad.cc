@@ -106,6 +106,7 @@ void TraverseModule(void) {
     std::string func_name;
     llvm::raw_os_ostream raw_cout( std::cout );
 
+    std::vector< llvm::Instruction* > ToEraseInsts;
     int op_code;
     for( llvm::Module::iterator ModIter = TheModule->begin(); ModIter != TheModule->end(); ++ModIter ) {
         llvm::Function* Func = llvm::cast<llvm::Function>(ModIter);
@@ -114,22 +115,27 @@ void TraverseModule(void) {
         for( llvm::Function::iterator FuncIter = Func->begin(); FuncIter != Func->end(); ++FuncIter ) {
             llvm::BasicBlock* BB = llvm::cast<llvm::BasicBlock>(FuncIter);
 
-            std::vector< llvm::Instruction* > LoadInsts;
+            std::vector< llvm::Instruction* > ToEraseInsts;
             for( llvm::BasicBlock::iterator BBIter = BB->begin(); BBIter != BB->end(); ++BBIter ) {
                 llvm::Instruction* Inst = llvm::cast<llvm::Instruction>(BBIter);
 
                 op_code = Inst->getOpcode();
-                if ( op_code == llvm::Instruction::Store && Inst->getNextNode()->getOpcode() == llvm::Instruction::Load) {
-                    llvm::Instruction* nextInst = Inst->getNextNode();
-                    if (nextInst->getOperand(0) == Inst->getOperand(1)) {
-                        nextInst->replaceAllUsesWith(Inst->getOperand(0));
-                        LoadInsts.push_back(nextInst);
-                    }
+                if ( 
+                        ( op_code == llvm::Instruction::Add &&
+                            llvm::isa<llvm::Constant>(Inst->getOperand(1)) && 
+                            llvm::dyn_cast<llvm::ConstantInt>(Inst->getOperand(1))->getSExtValue() == 0)
+                        ||
+                        ( op_code == llvm::Instruction::Mul &&
+                            llvm::isa<llvm::Constant>(Inst->getOperand(1)) && 
+                            llvm::dyn_cast<llvm::ConstantInt>(Inst->getOperand(1))->getSExtValue() == 1)
+                        ) {
+                    Inst->replaceAllUsesWith(Inst->getOperand(0));
 
+                    ToEraseInsts.push_back(Inst);
                 }
-
             }
-            for( int i = 0, Size=LoadInsts.size(); i < Size; ++i) { LoadInsts[i]->eraseFromParent();}
+
+            for( int i = 0, Size=ToEraseInsts.size(); i < Size; ++i) { ToEraseInsts[i]->eraseFromParent();}
         }
     }
 }
