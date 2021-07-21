@@ -51,9 +51,9 @@ define i32 @main() #4 {
   store i32 45, i32* %3, align 4
   %5 = load i32, i32* %2, align 4
   %6 = load i32, i32* %3, align 4
-  %subtmp = sub i32 %5, %6
-  %subtmp1 = sub i32 %subtmp, 6
-  store i32 %subtmp1, i32* %4, align 4
+  %multmp = mul i32 %5, %6
+  %subtmp = sub i32 %multmp, 6
+  store i32 %subtmp, i32* %4, align 4
   %7 = load i32, i32* %4, align 4
   %8 = call dereferenceable(272) %"class.std::basic_ostream"* @_ZNSolsEi(%"class.std::basic_ostream"* @_ZSt4cout, i32 %7)
   %9 = call dereferenceable(272) %"class.std::basic_ostream"* @_ZStlsISt11char_traitsIcEERSt13basic_ostreamIcT_ES5_c(%"class.std::basic_ostream"* dereferenceable(272) %8, i8 signext 10)

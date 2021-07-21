@@ -114,82 +114,20 @@ void TraverseModule(void) {
         for( llvm::Function::iterator FuncIter = Func->begin(); FuncIter != Func->end(); ++FuncIter ) {
             llvm::BasicBlock* BB = llvm::cast<llvm::BasicBlock>(FuncIter);
 
-            std::vector< llvm::Instruction* > AddInsts;
-            std::vector< llvm::Instruction* > ToDeleteInsts;
+            std::vector< llvm::StoreInst* > StoreInsts;
+            llvm::Instruction* LastInst;
+
             for( llvm::BasicBlock::iterator BBIter = BB->begin(); BBIter != BB->end(); ++BBIter ) {
                 llvm::Instruction* Inst = llvm::cast<llvm::Instruction>(BBIter);
 
-                if (auto *CB = llvm::dyn_cast<llvm::CallInst>(Inst)) {
-                    func_name = CB->getCalledFunction()->getName();
-                    if (func_cnt.find(func_name) != func_cnt.end()) {
-                        func_cnt.find(func_name)->second += 1;
-                    } else {
-                        func_cnt[func_name] = 1;
-                    }
+                if ( llvm::isa< llvm::StoreInst >( Inst )) {
+                    StoreInsts.push_back( llvm::cast< llvm::StoreInst >( Inst ));
                 }
 
-                if ( Inst->getOpcode() == llvm::Instruction::Add ) {
-                    if ( Inst->getNextNode()->getOpcode() == llvm::Instruction::Add ) {
+                LastInst = Inst;
 
-                        llvm::Instruction* nextInst = Inst->getNextNode();
-                        raw_cout << "Operand 0 : " << Inst->getOperand(0) << " Operand 1 : " << Inst->getOperand(1) <<  " dest : " << Inst<<  "\n";
-                        raw_cout << "Operand 0 : " << nextInst->getOperand(0) << " Operand 1 : " << nextInst->getOperand(1)  << " dest : " << nextInst <<  "\n";
-                        raw_cout << *Inst << "\n";
-                        raw_cout << *nextInst << "\n";
-                        if ( Inst == nextInst->getOperand(0) ) {
-
-                            llvm::Instruction* SubInst = llvm::BinaryOperator::Create(
-                                    llvm::Instruction::Sub,
-                                    nextInst->getOperand(0),
-                                    nextInst->getOperand(1),
-                                    "subtmp",
-                                    Inst
-                                    );
-                            llvm::Instruction* MulSubInst = llvm::BinaryOperator::Create(
-                                    llvm::Instruction::Mul,
-                                    Inst->getOperand(0),
-                                    Inst->getOperand(1),
-                                    "multmp",
-                                    nextInst
-                                    );
-
-                            nextInst->replaceAllUsesWith( SubInst );
-                            Inst->replaceAllUsesWith( MulSubInst );
-                            ToDeleteInsts.push_back( Inst );
-                            ToDeleteInsts.push_back( nextInst );
-                        }
-                    }
-                    //llvm::Instruction* SubInst = llvm::BinaryOperator::Create(
-                    //        llvm::Instruction::Sub,
-                    //        Inst->getOperand(0),
-                    //        Inst->getOperand(1),
-                    //        "subtmp",
-                    //        Inst
-
-                    //        );
-                    //Inst->replaceAllUsesWith( SubInst );
-                    //AddInsts.push_back( Inst );
-                }
-
-
-                //                if ( Inst->getOpcode() == llvm::Instruction::Add ) {
-                //                    llvm::BinaryOperator::Create(
-                //                            llvm::Instruction::Add,
-                //                            llvm::ConstantInt::get( llvm::IntegerType::get( *TheContext, 32 ), 1, true ),
-                //                            llvm::ConstantInt::get( llvm::IntegerType::get( *TheContext, 32 ), 1, true ),
-                //                            "addtmp",
-                //                            Inst
-                //                   
-                //                            );
-                //                }
-
-                op_code = Inst->getOpcode();
-                if (llvm::Instruction::Add <= op_code && op_code <= llvm::Instruction::FDiv) {
-                    inst_cnt[op_code - llvm::Instruction::Add]++;                    
-                }
             }
-            for( int i = 0, Size=AddInsts.size(); i < Size; ++i) { AddInsts[i]->eraseFromParent();}
-            for( int i = 0, Size=ToDeleteInsts.size(); i < Size; ++i) { ToDeleteInsts[i]->eraseFromParent();}
+            for( int i = 0, Size=StoreInsts.size(); i < Size; ++i) { StoreInsts[i]->moveBefore(LastInst);}
         }
     }
 }
