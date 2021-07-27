@@ -156,7 +156,6 @@ void TraverseModule(void) {
                                     );
 
                             nextInst->replaceAllUsesWith( SubInst );
-                            // Inst->replaceAllUsesWith( MulSubInst );
                             ToDeleteInsts.push_back( Inst );
                             ToDeleteInsts.push_back( nextInst );
                         }

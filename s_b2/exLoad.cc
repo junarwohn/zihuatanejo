@@ -131,7 +131,7 @@ void TraverseModule(void) {
                 if (Inst->getOpcode() == llvm::Instruction::Add) {
 
                     llvm::Instruction* LoadCountInst = new llvm::LoadInst(
-                            llvm::cast<llvm::Value>(AddInstCount),
+                            AddInstCount,
                             AddInstCount->getName(),
                             Inst 
                             );
