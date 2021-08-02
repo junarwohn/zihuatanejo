@@ -10,9 +10,7 @@ __kernel void matmul_HW4(
 
     int tidx = get_global_id(0);
     int tidy = get_global_id(1);
-    // printf("%d %d %d\n", tidx, tidy, K);
     if (tidx < M && tidy < N) {
-        // int Csub = 0.0f;
         float Csub = 0.0f;
         for (int k = 0; k < K; k += 8) {
             if (k < K) {
@@ -24,7 +22,6 @@ __kernel void matmul_HW4(
                 Csub += A[tidx * K + k + 5] * B[tidy + N * (k + 5)];
                 Csub += A[tidx * K + k + 6] * B[tidy + N * (k + 6)];
                 Csub += A[tidx * K + k + 7] * B[tidy + N * (k + 7)];
-                // Csub += A[tidx * K + k] * B[tidy + N * k] + A[tidx * K + k + 1] * B[tidy + N * (k + 1)] + A[tidx * K + k + 2] * B[tidy + N * (k + 2)] + A[tidx * K + k + 3] * B[tidy + N * (k + 3)] + A[tidx * K + k + 4] * B[tidy + N * (k + 4)] + A[tidx * K + k + 5] * B[tidy + N * (k + 5)] + A[tidx * K + k + 6] * B[tidy + N * (k + 6)] + A[tidx * K + k + 7] * B[tidy + N * (k + 7)];
             }
         }
 

@@ -10,6 +10,23 @@
 
 #define MAX_SOURCE_SIZE (0x100000)
 
+int validation(int M, int N, int K, float * a, float* b, float* c) {
+    int is_valid = 1;
+    for (int i = 0; i < M; ++i) {
+        for (int j = 0; j < N; ++j) {
+            float sub = 0;
+            for (int k = 0; k < K; ++k) {
+                sub += a[i*K + k] * b[j + N*k];
+            }
+            if (c[i*N + j] != sub) {
+                return -1;
+            }
+        }
+    }
+    return 0;
+}
+
+
 int main(void) {
     int i, j;
     const int LIST_SIZE = 64;
@@ -17,8 +34,8 @@ int main(void) {
     float *B = (float*)malloc(sizeof(float)*LIST_SIZE*LIST_SIZE);
     
     for(i = 0; i < LIST_SIZE * LIST_SIZE; ++i) {
-        A[i] = 1;
-        B[i] = 1;
+        A[i] = i % LIST_SIZE;
+        B[i] = i % LIST_SIZE;
     }
 
     FILE *fp;
@@ -95,13 +112,19 @@ int main(void) {
 
     ret = clEnqueueReadBuffer(command_queue, c_mem_obj, CL_TRUE, 0, LIST_SIZE * LIST_SIZE * sizeof(float), C, 0, NULL, NULL);
 
-    for( i = 0; i < LIST_SIZE; ++i ) {
-        for (j = 0; j < LIST_SIZE; ++j) {
-            printf("%lf ", C[i*LIST_SIZE + j]);
-        }
-        printf("\n");
-    }
+    //for( i = 0; i < LIST_SIZE; ++i ) {
+    //    for (j = 0; j < LIST_SIZE; ++j) {
+    //        printf("%lf ", C[i*LIST_SIZE + j]);
+    //    }
+    //    printf("\n");
+    //}
     printf("Execution time: %lf sec\n", (end_time - start_time) / CLOCKS_PER_SEC);
+
+    if (validation(LIST_SIZE, LIST_SIZE, LIST_SIZE, A, B, C) == -1) {
+        printf("result : FAILED\n");
+    } else {
+        printf("result : PASSED\n");
+    }
 
     printf("%d\n", ret);
 

@@ -10,9 +10,7 @@ __kernel void matmul_HW3(
 
     int tidx = get_global_id(0);
     int tidy = get_global_id(1);
-    // printf("%d %d %d\n", tidx, tidy, K);
     if (tidx < M && tidy < N) {
-        // int Csub = 0.0f;
         float Csub = 0.0f;
         for (int k = 0; k < K; ++k) {
             Csub += A[tidx * K + k] * B[tidy + N * k];

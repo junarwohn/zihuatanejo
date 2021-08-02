@@ -109,7 +109,8 @@ int main(void) {
     
     size_t global_item_size[2] = {LIST_SIZE_M, LIST_SIZE_N};
     // size_t global_item_size = LIST_SIZE;
-    size_t local_item_size[2] = {8, 8};
+    //size_t local_item_size[2] = {8, 8};
+    size_t local_item_size[2] = {32, 32};
     // size_t local_item_size = 64;
     ret = clEnqueueNDRangeKernel(command_queue, kernel, 2, NULL, global_item_size, local_item_size, 0, NULL, NULL);
 

@@ -82,7 +82,7 @@ int main(void) {
 //     size_t global_item_size = LIST_SIZE; // Process the entire lists
     size_t global_item_size[] = {LIST_SIZE, LIST_SIZE}; // Process the entire lists
 //     size_t local_item_size = 64; // Divide work items into groups of 64
-    size_t local_item_size[] = {32, 32}; // Divide work items into groups of 64
+    size_t local_item_size[] = {64, 64}; // Divide work items into groups of 64
     ret = clEnqueueNDRangeKernel(command_queue, kernel, 2, NULL, 
             global_item_size, local_item_size, 0, NULL, NULL);
 
@@ -94,8 +94,9 @@ int main(void) {
 
 
     // Display the result to the screen
-//     for(i = 0; i < LIST_SIZE; i++)
-//         printf("%d + %d = %d\n", A[i], B[i], C[i]);
+    // for(i = 0; i < LIST_SIZE; i++)
+    //     printf("%d + %d = %d\n", A[i], B[i], C[i]);
+        
 
     // Clean up
     ret = clFlush(command_queue);

@@ -109,12 +109,20 @@ int main(void) {
     
     size_t global_item_size[2] = {LIST_SIZE_M, LIST_SIZE_N};
     // size_t global_item_size = LIST_SIZE;
-    size_t local_item_size[2] = {8, 8};
+    // size_t local_item_size[2] = {8, 8};
+    size_t local_item_size[2] = {32, 32};
     // size_t local_item_size = 64;
-    ret = clEnqueueNDRangeKernel(command_queue, kernel, 2, NULL, global_item_size, local_item_size, 0, NULL, NULL);
+    int trial = 1;
+    float total_time = 0;
+    for ( i = 0; i < trial; ++i) {
 
-    end_time = clock();
+        ret = clEnqueueNDRangeKernel(command_queue, kernel, 2, NULL, global_item_size, local_item_size, 0, NULL, NULL);
+    
+        end_time = clock();
+        total_time += end_time - start_time;
 
+
+    }
 
     float *C = (float*)malloc(sizeof(float)*LIST_SIZE_M*LIST_SIZE_N);
 
@@ -128,7 +136,8 @@ int main(void) {
     // }
     printf("C[%d] : %lf\n", 1995, C[1995]);
     // C[1995] = 1995;
-    printf("Execution time: %lf sec\n", (end_time - start_time) / CLOCKS_PER_SEC);
+    printf("Execution time: %lf sec\n", total_time / trial / CLOCKS_PER_SEC);
+    //printf("Execution time: %lf sec\n", (end_time - start_time) / CLOCKS_PER_SEC);
     if (validation(LIST_SIZE_M, LIST_SIZE_N, LIST_SIZE_K, A, B, C) == -1) {
         printf("result : FAILED\n");
     } else {
