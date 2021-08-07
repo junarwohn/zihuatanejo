@@ -14,7 +14,7 @@ m = te.var('m')
 # declare a matrix element-wise multiply
 A = te.placeholder((m, n), name='A')
 B = te.placeholder((m, n), name='B')
-C = te.compute((m, n), lambda i, j: A[i, j] * B[i, j], name='C') # not matmul, more like elementwise
+C = te.compute((m, n), lambda i, j: A[i, j] * B[i, j], name='C')
 
 s = te.create_schedule([C.op])
 # lower will transform the computation from definition to the real
@@ -50,10 +50,7 @@ A = te.placeholder((m, n), name='A')
 B = te.compute((m, n), lambda i, j: A[i, j], name='B')
 
 s = te.create_schedule(B.op)
-
-# tile to four axes first: (i.outer, j.outer, j.inner)
 xo, yo, xi, yi = s[B].tile(B.op.axis[0], B.op.axis[1], x_factor=10, y_factor=5)
-# then fuse (i.inner, j.inner) into one axis: (i.inner.j.inner.fused)
 fused = s[B].fuse(xi, yi)
 print(tvm.lower(s, [A, B], simple_mode=True))
 
@@ -61,13 +58,13 @@ A = te.placeholder((m, n), name='A')
 B = te.compute((m, n), lambda i, j: A[i, j], name='B')
 
 s = te.create_schedule(B.op)
-# tile to four axis first: (i.outer, j.outer, i.inner, j.inner)
+# tile to four axes first: (i.outer, j.outer, j.inner)
 xo, yo, xi, yi = s[B].tile(B.op.axis[0], B.op.axis[1], x_factor=10, y_factor=5)
-# then reorder the axes: (i.inner, j.outer, i.outer, j.inner)
-s[B].reorder(xi, yo, xo, yi)
+# then fuse (i.inner, j.inner) into one axis: (i.inner.j.inner.fused)
+fused = s[B].reorder(xi, yi)
 print(tvm.lower(s, [A, B], simple_mode=True))
 
-A = te.placeholder((m,n), name='A')
+A = te.placeholder((n,), name='A')
 B = te.compute(A.shape, lambda i: A[i] * 2, name='B')
 
 s = te.create_schedule(B.op)
